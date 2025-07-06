@@ -1,6 +1,7 @@
 package dev.rhcehd123.dailylog.utils
 
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -17,7 +18,7 @@ object Utils {
             if (this == null) {
                 "null"
             } else {
-                dateFormat.format(Instant.ofEpochMilli(this))
+                dateFormat.format(LocalDate.ofEpochDay(this))
             }
         } catch (e: Exception) {
             e.toString()

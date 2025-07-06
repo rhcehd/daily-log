@@ -1,11 +1,10 @@
-package dev.rhcehd123.dailylog.ui.screen.addcontent
+package dev.rhcehd123.dailylog.ui.screen.addlog
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dev.rhcehd123.dailylog.data.model.Content
-import dev.rhcehd123.dailylog.data.repository.ContentRepository
-import dev.rhcehd123.dailylog.ui.state.AddContentResultState
+import dev.rhcehd123.dailylog.data.repository.DailyLogRepository
+import dev.rhcehd123.dailylog.ui.screen.addlog.state.AddDailyLogResultState
 import dev.rhcehd123.dailylog.utils.Utils.currentLocalTimeMillis
 import dev.rhcehd123.dailylog.utils.Utils.toDayNumber
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,15 +14,17 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AddContentViewModel @Inject constructor(
-    private val contentRepository: ContentRepository
+class AddLogViewModel @Inject constructor(
+    private val dailyLogRepository: DailyLogRepository
 ): ViewModel() {
     companion object {
         const val MAX_COMMENT_LENGTH = 200
     }
 
-    private val _uiState = MutableStateFlow(AddContentUiState(date = currentLocalTimeMillis().toDayNumber()))
+    private val _uiState = MutableStateFlow(AddLogUiState(date = currentLocalTimeMillis().toDayNumber()))
     val uiState = _uiState.asStateFlow()
+
+    private val _selectedTaskId = MutableStateFlow(0L)
 
     fun updateDate(date: Long) {
         _uiState.value = _uiState.value.copy(
@@ -37,22 +38,27 @@ class AddContentViewModel @Inject constructor(
         )
     }
 
+    fun updateSelectedTaskId(taskId: Long) {
+        _selectedTaskId.update { taskId }
+    }
+
     fun addContent() {
         val date = _uiState.value.date
         val text = _uiState.value.text
+        val taskId = _selectedTaskId.value
 
         viewModelScope.launch {
-            val result = contentRepository.addContent(Content(date, text))
+            val result = dailyLogRepository.addDailyLog(taskId, date, text)
             if(!result) {
                 _uiState.update {
                     _uiState.value.copy(
-                        addContentResultState = AddContentResultState.Failure()
+                        addDailyLogResultState = AddDailyLogResultState.Failure()
                     )
                 }
             } else {
                 _uiState.update {
                     _uiState.value.copy(
-                        addContentResultState = AddContentResultState.Success()
+                        addDailyLogResultState = AddDailyLogResultState.Success()
                     )
                 }
             }

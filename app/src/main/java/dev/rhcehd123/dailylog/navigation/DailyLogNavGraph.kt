@@ -1,18 +1,19 @@
 package dev.rhcehd123.dailylog.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
-import dev.rhcehd123.dailylog.ui.screen.addcontent.AddContentScreen
+import dev.rhcehd123.dailylog.ui.screen.addlog.AddLogScreen
 import dev.rhcehd123.dailylog.ui.screen.home.HomeScreen
 import dev.rhcehd123.dailylog.ui.screen.settings.SettingsDialog
 
-object WidgetSampleRoute {
-    const val MAIN = "main"
-    const val ADD_CONTENT = "add_content"
+object DailyLogRoute {
+    const val HOME = "home"
+    const val ADD_LOG = "add_log"
     const val SETTINGS = "settings"
 }
 
@@ -23,30 +24,33 @@ fun DailyLogNavGraph(
     onShowSnackbar: (String) -> Unit,
     onChangeFabSlot: (@Composable () -> Unit) -> Unit,
 ) {
+    val onNavigateToAddLogWithTaskId: (Long) -> Unit = remember { { taskId -> navController.navigate("${DailyLogRoute.ADD_LOG}/$taskId") } }
+    val onNavigateToBackStack: () -> Unit = remember { { navController.popBackStack() } }
     NavHost(
         modifier = modifier,
         navController = navController,
-        startDestination = WidgetSampleRoute.MAIN
+        startDestination = DailyLogRoute.HOME
     ) {
-        composable(WidgetSampleRoute.MAIN) {
+        composable(DailyLogRoute.HOME) {
             HomeScreen(
-                onNavigateToAddContent = { navController.navigate(WidgetSampleRoute.ADD_CONTENT) },
+                onNavigateToAddLogWithTaskId = onNavigateToAddLogWithTaskId,
                 onChangeFabSlot = onChangeFabSlot
             )
         }
 
-        composable(WidgetSampleRoute.ADD_CONTENT) {
-            //onChangeFabSlot({})
-            AddContentScreen(
-                onNavigateToMain = { navController.popBackStack() },
+        composable("${DailyLogRoute.ADD_LOG}/{taskId}") {
+            val taskId = it.arguments?.getString("taskId")?.toLong() ?: 0L
+            AddLogScreen(
+                taskId = taskId,
+                onNavigateToHome = onNavigateToBackStack,
                 onShowSnackbar = onShowSnackbar,
                 onChangeFabSlot = onChangeFabSlot
             )
         }
 
-        dialog(WidgetSampleRoute.SETTINGS) {
+        dialog(DailyLogRoute.SETTINGS) {
             SettingsDialog(
-                onDismiss = { navController.popBackStack() }
+                onDismiss = onNavigateToBackStack
             )
         }
     }

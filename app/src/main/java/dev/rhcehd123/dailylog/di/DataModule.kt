@@ -9,12 +9,15 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dev.rhcehd123.dailylog.data.datastore.DataStoreManager
 import dev.rhcehd123.dailylog.data.datastore.DataStoreManagerImpl
-import dev.rhcehd123.dailylog.data.repository.ContentRepository
+import dev.rhcehd123.dailylog.data.repository.DailyLogRepository
+import dev.rhcehd123.dailylog.data.repository.DailyTaskRepository
 import dev.rhcehd123.dailylog.data.repository.SettingsRepository
-import dev.rhcehd123.dailylog.data.repository.impl.ContentRepositoryImpl
+import dev.rhcehd123.dailylog.data.repository.impl.DailyLogRepositoryImpl
+import dev.rhcehd123.dailylog.data.repository.impl.DailyTaskRepositoryImpl
 import dev.rhcehd123.dailylog.data.repository.impl.SettingsRepositoryImpl
 import dev.rhcehd123.dailylog.data.room.AppDatabase
-import dev.rhcehd123.dailylog.data.room.dao.ContentDao
+import dev.rhcehd123.dailylog.data.room.dao.DailyLogDao
+import dev.rhcehd123.dailylog.data.room.dao.DailyTaskDao
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -35,19 +38,6 @@ object DataModule {
     }
 
     @Provides
-    fun providesContentDao(
-        appDatabase: AppDatabase
-    ) = appDatabase.contentDao()
-
-    @Provides
-    fun providesContentRepository(
-        contentDao: ContentDao,
-        appDatabase: AppDatabase
-    ): ContentRepository {
-        return ContentRepositoryImpl(contentDao, appDatabase)
-    }
-
-    @Provides
     fun providesDataStoreManager(
         @ApplicationContext context: Context
     ): DataStoreManager {
@@ -55,8 +45,32 @@ object DataModule {
     }
 
     @Provides
+    fun providesDailyLogDao(
+        appDatabase: AppDatabase
+    ) = appDatabase.dailyLogDao()
+
+    @Provides
+    fun providesDailyTaskDao(
+        appDatabase: AppDatabase
+    ) = appDatabase.dailyTaskDao()
+
+    @Provides
+    fun providesDailyLogRepository(
+        dailyLogDao: DailyLogDao,
+    ): DailyLogRepository {
+        return DailyLogRepositoryImpl(dailyLogDao)
+    }
+
+    @Provides
+    fun providesDailyTaskRepository(
+        dailtTaskDao: DailyTaskDao
+    ): DailyTaskRepository {
+        return DailyTaskRepositoryImpl(dailtTaskDao)
+    }
+
+    @Provides
     fun providesSettingsRepository(
-        dataStoreManager: DataStoreManager
+        dataStoreManager: DataStoreManager,
     ): SettingsRepository {
         return SettingsRepositoryImpl(dataStoreManager)
     }

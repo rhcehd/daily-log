@@ -1,4 +1,4 @@
-package dev.rhcehd123.dailylog.ui.screen.addcontent.component
+package dev.rhcehd123.dailylog.ui.screen.addlog.component
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize

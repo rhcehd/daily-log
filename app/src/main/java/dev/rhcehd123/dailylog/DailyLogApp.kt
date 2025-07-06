@@ -9,7 +9,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.navigation.compose.rememberNavController
 import dev.rhcehd123.dailylog.navigation.DailyLogNavGraph
-import dev.rhcehd123.dailylog.navigation.WidgetSampleRoute
 import dev.rhcehd123.dailylog.ui.component.DailyLogScaffold
 import kotlinx.coroutines.launch
 
@@ -19,25 +18,20 @@ fun DailyLogApp() {
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     var fabSlot: @Composable () -> Unit by remember { mutableStateOf({}) }
+
+    val onShowSnackbar: (String) -> Unit = remember { { message -> scope.launch { snackbarHostState.showSnackbar(message) } } }
+    val onChangeFabSlot: (@Composable () -> Unit) -> Unit = remember { { fabSlot = it } }
+
     DailyLogScaffold(
+        scope = scope,
+        navController = navController,
         snackbarHostState = snackbarHostState,
-        onNavigateToAction = {
-            navController.navigate(WidgetSampleRoute.SETTINGS) {
-                launchSingleTop = true
-            }
-        },
         fabSlot = fabSlot
     ) {
         DailyLogNavGraph(
             navController = navController,
-            onShowSnackbar = { message ->
-                scope.launch {
-                    snackbarHostState.showSnackbar(message)
-                }
-            },
-            onChangeFabSlot = {
-                fabSlot = it
-            }
+            onShowSnackbar = onShowSnackbar,
+            onChangeFabSlot = onChangeFabSlot
         )
     }
 }

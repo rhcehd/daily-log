@@ -1,5 +1,6 @@
 package dev.rhcehd123.dailylog.ui.screen.home
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,12 +18,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import dev.rhcehd123.dailylog.ui.component.Loading
 import dev.rhcehd123.dailylog.ui.model.ContentType
+import dev.rhcehd123.dailylog.ui.screen.drawer.DrawerViewModel
 import dev.rhcehd123.dailylog.ui.screen.home.component.DailyLogCalendar
 import dev.rhcehd123.dailylog.ui.theme.DailyLogTheme
 import dev.rhcehd123.dailylog.utils.TestTag
@@ -31,14 +34,20 @@ import dev.rhcehd123.dailylog.utils.Utils.toDateString
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
-    onNavigateToAddContent: () -> Unit,
+    drawerViewModel: DrawerViewModel = hiltViewModel(LocalContext.current as ComponentActivity),
+    onNavigateToAddLogWithTaskId: (Long) -> Unit,
     onChangeFabSlot: (@Composable () -> Unit) -> Unit
 ) {
+    val selectedTask by drawerViewModel.selectedTask.collectAsState()
+    LaunchedEffect(selectedTask) {
+        viewModel.setDailyTask(selectedTask)
+    }
+
     LaunchedEffect(Unit) {
         onChangeFabSlot({
             FloatingActionButton(
                 modifier = Modifier.testTag(TestTag.AddContentButton),
-                onClick = onNavigateToAddContent,
+                onClick = { onNavigateToAddLogWithTaskId(selectedTask.id) },
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
@@ -49,7 +58,6 @@ fun HomeScreen(
     }
 
     val uiState by viewModel.uiState.collectAsState()
-
     HomeScreen(
         uiState = uiState,
     )
@@ -77,7 +85,10 @@ fun CalendarForm(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
-        DailyLogCalendar(contents = uiState.contents)
+        DailyLogCalendar(
+            title = uiState.dailyTask.name,
+            dailyLogs = uiState.dailyLogs
+        )
     }
 }
 
@@ -85,7 +96,7 @@ fun CalendarForm(
 fun ListForm(
     uiState: HomeUiState,
 ) {
-    val contents = uiState.contents
+    val contents = uiState.dailyLogs
     LazyColumn(
         modifier = Modifier
             .testTag(TestTag.ContentList)
@@ -123,7 +134,7 @@ fun HomeScreenCalendarTypePreview() {
         HomeScreen(
             uiState = HomeUiState(
                 contentType = ContentType.CalendarType,
-                contents = listOf()
+                dailyLogs = listOf()
             )
         )
     }
@@ -136,7 +147,7 @@ fun HomeScreenListTypePreview() {
         HomeScreen(
             uiState = HomeUiState(
                 contentType = ContentType.ListType,
-                contents = listOf()
+                dailyLogs = listOf()
             )
         )
     }

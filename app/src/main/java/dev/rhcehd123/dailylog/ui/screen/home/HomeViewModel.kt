@@ -3,26 +3,28 @@ package dev.rhcehd123.dailylog.ui.screen.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dev.rhcehd123.dailylog.data.model.Content
-import dev.rhcehd123.dailylog.data.repository.ContentRepository
+import dev.rhcehd123.dailylog.data.model.DailyLog
+import dev.rhcehd123.dailylog.data.model.DailyTask
+import dev.rhcehd123.dailylog.data.repository.DailyLogRepository
 import dev.rhcehd123.dailylog.data.repository.SettingsRepository
 import dev.rhcehd123.dailylog.ui.model.ContentType
 import dev.rhcehd123.dailylog.utils.DataState
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val contentRepository: ContentRepository,
+    private val dailyLogRepository: DailyLogRepository,
     private val settingsRepository: SettingsRepository
 ) : ViewModel() {
-    private val contentsStateFlow = contentRepository.contentsFlow.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(500),
-        initialValue = DataState.Loading
-    )
+    private lateinit var dailyLogStateFlow: StateFlow<List<DailyLog>>
     private val contentTypeStateFlow = settingsRepository.contentTypeFlow
         .stateIn(
             scope = viewModelScope,
@@ -30,35 +32,48 @@ class HomeViewModel @Inject constructor(
             initialValue = DataState.Loading
         )
 
-    val uiState =
-        contentsStateFlow.combine(contentTypeStateFlow) { contentsState, contentTypeState ->
-            var isLoading = false
-            var contentType = ContentType.CalendarType
-            var contents = emptyList<Content>()
-            when (contentsState) {
-                is DataState.Loading -> { isLoading = true }
-                is DataState.Success -> { contents = contentsState.data }
-                is DataState.Error -> {  }
-            }
-            when (contentTypeState) {
-                is DataState.Loading -> { isLoading = true }
-                is DataState.Success -> { contentType = ContentType.fromValue(contentTypeState.data) }
-                is DataState.Error -> {  }
-            }
-            HomeUiState(
-                isLoading = isLoading,
-                contents = contents,
-                contentType = contentType
-            )
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(500),
-            initialValue = HomeUiState(isLoading = true)
-        )
+    private var _uiState = MutableStateFlow(HomeUiState())
+    val uiState = _uiState.asStateFlow()
 
-    /*init {
+    init {
         viewModelScope.launch {
-            (contentRepository as? ContentRepositoryImpl)?.clearAllDataForTest()
+            contentTypeStateFlow.collect { dataState ->
+                when(dataState) {
+                    is DataState.Loading -> {
+                        _uiState.update {
+                            _uiState.value.copy(isLoading = true)
+                        }
+                    }
+                    is DataState.Success -> {
+                        _uiState.update {
+                            _uiState.value.copy(
+                                isLoading = false,
+                                contentType = ContentType.fromValue(dataState.data)
+                            )
+                        }
+                    }
+                    is DataState.Error -> {}
+                }
+            }
         }
-    }*/
+    }
+
+    fun setDailyTask(dailyTask: DailyTask) {
+        _uiState.update {
+            _uiState.value.copy(dailyTask = dailyTask)
+        }
+        dailyLogStateFlow = dailyLogRepository.dailyLogsFlow(dailyTask.id)
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(500),
+                initialValue = emptyList()
+            )
+        viewModelScope.launch {
+            dailyLogStateFlow.collect { dailyLogs ->
+                _uiState.update {
+                    _uiState.value.copy(dailyLogs = dailyLogs)
+                }
+            }
+        }
+    }
 }

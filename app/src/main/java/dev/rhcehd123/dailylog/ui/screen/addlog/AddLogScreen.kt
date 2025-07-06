@@ -1,4 +1,4 @@
-package dev.rhcehd123.dailylog.ui.screen.addcontent
+package dev.rhcehd123.dailylog.ui.screen.addlog
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -12,15 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
@@ -41,45 +35,61 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import dev.rhcehd123.dailylog.ui.screen.addcontent.AddContentViewModel.Companion.MAX_COMMENT_LENGTH
-import dev.rhcehd123.dailylog.ui.screen.addcontent.component.DatePickerDialog
+import dev.rhcehd123.dailylog.ui.screen.addlog.AddLogViewModel.Companion.MAX_COMMENT_LENGTH
+import dev.rhcehd123.dailylog.ui.screen.addlog.component.DatePickerDialog
 import dev.rhcehd123.dailylog.utils.Utils.toDayNumber
 import dev.rhcehd123.dailylog.utils.Utils.toDateString
-import dev.rhcehd123.dailylog.ui.state.AddContentResultState
+import dev.rhcehd123.dailylog.ui.screen.addlog.state.AddDailyLogResultState
 import dev.rhcehd123.dailylog.ui.theme.DailyLogTheme
 import dev.rhcehd123.dailylog.utils.TestTag
 import dev.rhcehd123.dailylog.utils.Utils.currentLocalTimeMillis
 import dev.rhcehd123.dailylog.utils.Utils.toLocalTimeMillis
 
 @Composable
-fun AddContentScreen(
-    viewModel: AddContentViewModel = hiltViewModel(),
-    onNavigateToMain: () -> Unit,
+fun AddLogScreen(
+    viewModel: AddLogViewModel = hiltViewModel(),
+    taskId: Long,
+    onNavigateToHome: () -> Unit,
     onShowSnackbar: (String) -> Unit,
     onChangeFabSlot: (@Composable () -> Unit) -> Unit
 ) {
     LaunchedEffect(Unit) {
         onChangeFabSlot({})
+        viewModel.updateSelectedTaskId(taskId)
     }
 
     val uiState by viewModel.uiState.collectAsState()
-    AddContentScreen(
-        uiState = uiState,
-        onDismiss = onNavigateToMain,
-        onShowSnackbar = onShowSnackbar,
-        onAddContent = viewModel::addContent,
+    AddLogScreen(
+        onDismiss = onNavigateToHome,
+        onAddLog = viewModel::addContent,
         onDateChange = viewModel::updateDate,
         onCommentChange = viewModel::updateComment,
     )
+
+    val state = uiState.addDailyLogResultState
+    LaunchedEffect(state) {
+        when (state) {
+            is AddDailyLogResultState.Failure -> {
+                onShowSnackbar(state.message)
+            }
+
+            is AddDailyLogResultState.Success -> {
+                onShowSnackbar(state.message)
+                onNavigateToHome()
+            }
+
+            is AddDailyLogResultState.Idle -> {
+                //do nothing
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddContentScreen(
-    uiState: AddContentUiState,
+fun AddLogScreen(
     onDismiss: () -> Unit,
-    onShowSnackbar: (String) -> Unit,
-    onAddContent: () -> Unit,
+    onAddLog: () -> Unit,
     onDateChange: (Long) -> Unit,
     onCommentChange: (String) -> Unit,
 ) {
@@ -90,23 +100,6 @@ fun AddContentScreen(
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
     val keyboardController = LocalSoftwareKeyboardController.current
-    val state = uiState.addContentResultState
-    LaunchedEffect(state) {
-        when (state) {
-            is AddContentResultState.Failure -> {
-                onShowSnackbar(state.message)
-            }
-
-            is AddContentResultState.Success -> {
-                onShowSnackbar(state.message)
-                onDismiss()
-            }
-
-            is AddContentResultState.Idle -> {
-                //do nothing
-            }
-        }
-    }
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -195,7 +188,7 @@ fun AddContentScreen(
                         if (selectedDate.isEmpty()) {
                             return@Button
                         } else {
-                            onAddContent()
+                            onAddLog()
                         }
                     }
                 ) {
@@ -221,11 +214,9 @@ fun AddContentScreen(
 @Preview
 fun AddContentScreenPreview() {
     DailyLogTheme {
-        AddContentScreen(
-            uiState = AddContentUiState(date = currentLocalTimeMillis()),
-            onAddContent = {},
+        AddLogScreen(
+            onAddLog = {},
             onDismiss = {},
-            onShowSnackbar = {},
             onDateChange = {},
             onCommentChange = {}
         )

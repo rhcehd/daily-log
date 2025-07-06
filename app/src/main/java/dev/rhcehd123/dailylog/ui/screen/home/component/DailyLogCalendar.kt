@@ -38,7 +38,7 @@ import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.DayPosition
 import com.kizitonwose.calendar.core.daysOfWeek
-import dev.rhcehd123.dailylog.data.model.Content
+import dev.rhcehd123.dailylog.data.model.DailyLog
 import dev.rhcehd123.dailylog.ui.theme.DailyLogTheme
 import dev.rhcehd123.dailylog.utils.TestTag
 import java.time.DayOfWeek
@@ -48,9 +48,10 @@ import java.util.Locale
 
 @Composable
 fun DailyLogCalendar(
-    contents: List<Content>
+    title: String = "",
+    dailyLogs: List<DailyLog>
 ) {
-    val contentsSet = remember(contents) { contents.toSet() }
+    val contentsSet = remember(dailyLogs) { dailyLogs.toSet() }
     val currentMonth = remember { YearMonth.now() }
     val startMonth = remember { currentMonth.minusMonths(100) } // Adjust as needed
     val endMonth = remember { currentMonth.plusMonths(100) } // Adjust as needed
@@ -81,6 +82,13 @@ fun DailyLogCalendar(
         //userScrollEnabled = true,
         monthHeader = {
             Column {
+                Text(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(vertical = 20.dp),
+                    text = title,
+                    fontSize = TextUnit(40f, TextUnitType.Sp)
+                )
                 Text(
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
@@ -181,7 +189,7 @@ fun Day(
 fun DailyLogCalendarPreview() {
     DailyLogTheme {
         DailyLogCalendar(
-            contents = emptyList()
+            dailyLogs = emptyList()
         )
     }
 }
