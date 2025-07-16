@@ -16,8 +16,8 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     // for debug
-    @Inject
-    lateinit var appDatabase: AppDatabase
+    /*@Inject
+    lateinit var appDatabase: AppDatabase*/
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

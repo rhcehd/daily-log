@@ -1,11 +1,19 @@
 package dev.rhcehd123.dailylog.utils
 
 object TestTag {
+
     // common
     const val SettingsButton = "settings_button"
 
+    // drawer
+    const val NavigationIcon = "navigation_icon"
+    const val DrawerContent = "drawer_content"
+    const val AddDailyTaskButton = "add_dailytask_button"
+    const val AddDailyTaskDialog = "add_dailytask_dialog"
+    const val DailyTaskItem = "dailytask_item"
+    
     // main screen
-    const val AddContentButton = "add_content_button"
+    const val AddDailyLogButton = "add_dailylog_button"
     const val ContentCalendar = "content_calendar"
     const val ContentList = "content_list"
 

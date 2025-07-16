@@ -10,9 +10,9 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import dev.rhcehd123.dailylog.ui.component.DailyLogScaffold
 import dev.rhcehd123.dailylog.ui.screen.home.HomeScreen
 import dev.rhcehd123.dailylog.utils.TestTag
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -24,11 +24,6 @@ class HomeScreenTest {
     @get:Rule(order = 1)
     val composeTestRule = createAndroidComposeRule<HiltTestActivity>()
 
-    @Before
-    fun setup() {
-        hiltAndroidRule.inject()
-    }
-
     @Test
     fun addContentButton_isDisplayed() {
         composeTestRule.setContent {
@@ -37,7 +32,7 @@ class HomeScreenTest {
                 fabSlot = fabSlot
             ) {
                 HomeScreen(
-                    onNavigateToAddContent = {},
+                    onNavigateToAddLogWithTaskId = {},
                     onChangeFabSlot = {
                         fabSlot = it
                     }
@@ -45,7 +40,7 @@ class HomeScreenTest {
             }
         }
 
-        composeTestRule.onNodeWithTag(TestTag.AddContentButton)
+        composeTestRule.onNodeWithTag(TestTag.AddDailyLogButton)
             .assertIsDisplayed()
     }
 }

@@ -12,9 +12,14 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+const val DEFAULT_DAILY_TASK_NAME = "New Task"
+
 class DailyTaskRepositoryImpl @Inject constructor(
     private val dailyTaskDao: DailyTaskDao
 ) : DailyTaskRepository {
+
+
+
     override val dailyTasksFlow: Flow<List<DailyTask>> = dailyTaskDao
         .getAll()
         .onEach {
@@ -40,7 +45,7 @@ class DailyTaskRepositoryImpl @Inject constructor(
             if(dailyTask != null) {
                 dailyTask.toDomain()
             } else {
-                val newTaskId = dailyTaskDao.insert(DailyTask(name = "New Task").toEntity())
+                val newTaskId = dailyTaskDao.insert(DailyTask(name = DEFAULT_DAILY_TASK_NAME).toEntity())
                 dailyTaskDao.getById(newTaskId)?.toDomain() ?: throw Exception("Failed to create task")
             }
         }

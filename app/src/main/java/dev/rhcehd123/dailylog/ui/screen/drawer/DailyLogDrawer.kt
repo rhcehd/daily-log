@@ -23,12 +23,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import dev.rhcehd123.dailylog.data.model.DailyTask
 import dev.rhcehd123.dailylog.ui.screen.drawer.state.AddDailyTaskResultState
 import dev.rhcehd123.dailylog.ui.theme.DailyLogTheme
+import dev.rhcehd123.dailylog.utils.TestTag
 
 @Composable
 fun DailyLogDrawer(
@@ -67,7 +69,9 @@ fun DailyLogDrawer(
     onAddDailyTask: (String) -> Unit,
 ) {
     var showAddDailyTaskDialog by remember { mutableStateOf(false) }
-    ModalDrawerSheet {
+    ModalDrawerSheet(
+        modifier = Modifier.testTag(TestTag.DrawerContent)
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -86,6 +90,7 @@ fun DailyLogDrawer(
         )
 
         NavigationDrawerItem(
+            modifier = Modifier.testTag(TestTag.AddDailyTaskButton),
             label = {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -124,22 +129,22 @@ fun DailyTaskList(
 ) {
     val dailyTasks = uiState.dailyTasks
     val selectedTaskId = uiState.selectedTaskId
-    dailyTasks.forEach {
+    dailyTasks.forEachIndexed { index, dailyTask ->
         NavigationDrawerItem(
+            modifier = Modifier.testTag("${TestTag.DailyTaskItem}_$index"),
             label = {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = it.name
+                        text = dailyTask.name
                     )
                 }
-
             },
-            selected = it.id == selectedTaskId,
+            selected = dailyTask.id == selectedTaskId,
             onClick = {
-                onSelectDailyTask(it)
+                onSelectDailyTask(dailyTask)
             }
         )
     }
@@ -151,6 +156,7 @@ fun AddDailyTaskDialog(
 ) {
     var dailyTaskName by remember { mutableStateOf("") }
     AlertDialog(
+        modifier = Modifier.testTag(TestTag.AddDailyTaskDialog),
         onDismissRequest = { onDismiss(null) },
         title = {
             Text("Add Daily Task")

@@ -46,7 +46,7 @@ fun HomeScreen(
     LaunchedEffect(Unit) {
         onChangeFabSlot({
             FloatingActionButton(
-                modifier = Modifier.testTag(TestTag.AddContentButton),
+                modifier = Modifier.testTag(TestTag.AddDailyLogButton),
                 onClick = { onNavigateToAddLogWithTaskId(selectedTask.id) },
             ) {
                 Icon(

@@ -32,7 +32,7 @@ class HomeViewModel @Inject constructor(
             initialValue = DataState.Loading
         )
 
-    private var _uiState = MutableStateFlow(HomeUiState())
+    private var _uiState = MutableStateFlow(HomeUiState(isLoading = true))
     val uiState = _uiState.asStateFlow()
 
     init {

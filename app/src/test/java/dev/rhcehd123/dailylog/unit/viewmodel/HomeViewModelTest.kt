@@ -1,8 +1,10 @@
 package dev.rhcehd123.dailylog.unit.viewmodel
 
 import app.cash.turbine.test
-import dev.rhcehd123.dailylog.data.model.Content
-import dev.rhcehd123.dailylog.data.repository.ContentRepository
+import dev.rhcehd123.dailylog.ProjectConfig
+import dev.rhcehd123.dailylog.data.model.DailyLog
+import dev.rhcehd123.dailylog.data.model.DailyTask
+import dev.rhcehd123.dailylog.data.repository.DailyLogRepository
 import dev.rhcehd123.dailylog.data.repository.SettingsRepository
 import dev.rhcehd123.dailylog.ui.model.ContentType
 import dev.rhcehd123.dailylog.ui.screen.home.HomeUiState
@@ -12,33 +14,40 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.advanceUntilIdle
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModelTest : FunSpec({
+    val scope = ProjectConfig.testScope
     lateinit var viewModel: HomeViewModel
-    lateinit var contentRepository: ContentRepository
+    lateinit var dailyLogRepository: DailyLogRepository
     lateinit var settingsRepository: SettingsRepository
 
-    test("uiState should emit Success containing expected content and content type") {
-        val testContents = listOf(Content(date = 1L, comment = "Hello"))
+    test("uiState should emit Success containing expected dailyTask, dailyLog and contentType") {
+        val testDailyTask = DailyTask(id = 1L, name = "Test Task")
+        val testDailyLogs = listOf(DailyLog(taskId = 1L, date = 1L, comment = "Hello"))
         val testType = "list"
 
-        contentRepository = mockk {
-            every { contentsFlow } returns flowOf(DataState.Success(testContents))
+        dailyLogRepository = mockk {
+            every { dailyLogsFlow(any()) } returns flowOf(testDailyLogs)
         }
         settingsRepository = mockk {
             every { contentTypeFlow } returns flowOf(DataState.Success(testType))
         }
-        viewModel = HomeViewModel(contentRepository, settingsRepository)
+        viewModel = HomeViewModel(dailyLogRepository, settingsRepository)
+        viewModel.setDailyTask(testDailyTask)
+        scope.advanceUntilIdle()
 
         viewModel.uiState.test {
-            //awaitItem() shouldBe MainUiState(isLoading = true)
-            awaitItem() shouldBe HomeUiState(
+            val item = awaitItem()
+            item shouldBe HomeUiState(
                 isLoading = false,
-                contents = testContents,
+                dailyTask = testDailyTask,
+                dailyLogs = testDailyLogs,
                 contentType = ContentType.ListType
             )
-            cancelAndConsumeRemainingEvents()
         }
     }
 })

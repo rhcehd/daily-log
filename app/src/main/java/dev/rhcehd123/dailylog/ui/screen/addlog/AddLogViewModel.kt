@@ -25,6 +25,7 @@ class AddLogViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     private val _selectedTaskId = MutableStateFlow(0L)
+    val selectedTaskId = _selectedTaskId.asStateFlow()
 
     fun updateDate(date: Long) {
         _uiState.value = _uiState.value.copy(

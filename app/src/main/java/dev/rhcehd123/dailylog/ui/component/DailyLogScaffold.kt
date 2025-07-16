@@ -71,6 +71,7 @@ fun DailyLogScaffold(
                     },
                     navigationIcon = {
                         IconButton(
+                            modifier = Modifier.testTag(TestTag.NavigationIcon),
                             onClick = { scope?.launch { drawerState.open() } }
                         ) {
                             Icon(Icons.Default.Menu, contentDescription = "Menu")

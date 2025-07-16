@@ -1,6 +1,7 @@
 package dev.rhcehd123.dailylog.unit.viewmodel
 
 import app.cash.turbine.test
+import dev.rhcehd123.dailylog.ProjectConfig
 import dev.rhcehd123.dailylog.data.repository.SettingsRepository
 import dev.rhcehd123.dailylog.ui.model.ContentType
 import dev.rhcehd123.dailylog.ui.screen.settings.SettingsViewModel
@@ -11,9 +12,13 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.advanceUntilIdle
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class SettingsViewModelTest: FunSpec({
+    val scope = ProjectConfig.testScope
     lateinit var viewModel: SettingsViewModel
     lateinit var settingsRepository: SettingsRepository
 
@@ -33,6 +38,7 @@ class SettingsViewModelTest: FunSpec({
             viewModel = SettingsViewModel(settingsRepository)
         }
         test("uiState should emit Calendar as the default content type") {
+            scope.advanceUntilIdle()
             viewModel.uiState.test {
                 awaitItem().contentType shouldBe ContentType.CalendarType
             }
@@ -47,6 +53,7 @@ class SettingsViewModelTest: FunSpec({
             viewModel = SettingsViewModel(settingsRepository)
         }
         test("uiState should emit expected content type") {
+            scope.advanceUntilIdle()
             viewModel.uiState.test {
                 awaitItem().contentType shouldBe ContentType.ListType
             }
