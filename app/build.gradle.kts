@@ -4,12 +4,10 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("kotlin-kapt")
-    id("com.google.devtools.ksp")
-    id("dagger.hilt.android.plugin")
-
-    id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.google.gms)
+    alias(libs.plugins.firebase.crashlytics)
 }
 
 val keystoreProperties = Properties().apply {
@@ -67,66 +65,57 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
-    //implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.navigation.compose)
+
     testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
-
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
-    testImplementation("io.mockk:mockk:1.13.9")
-    testImplementation("com.google.truth:truth:1.1.5")
-    testImplementation("app.cash.turbine:turbine:1.1.0")
-
-    androidTestImplementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-    androidTestImplementation("com.google.dagger:hilt-android-testing:2.51.1")
-    kspAndroidTest("com.google.dagger:hilt-compiler:2.51.1")
-
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockk)
+    testImplementation(libs.google.truth)
+    testImplementation(libs.turbine)
     //kotest
-    testImplementation("io.kotest:kotest-assertions-core:5.8.0")
-    testImplementation("io.kotest:kotest-runner-junit5:5.8.0")
+    testImplementation(libs.kotest.assertion)
+    testImplementation(libs.kotest.runner)
 
-    implementation("androidx.navigation:navigation-compose:2.8.9")
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.runner)
+    androidTestImplementation(platform(libs.compose.bom))
+    androidTestImplementation(libs.compose.ui.test.junit4)
+    debugImplementation(libs.compose.ui.test.manifest)
+    androidTestImplementation(libs.hilt.navigation.compose)
+    androidTestImplementation(libs.hilt.android.testing)
+    kspAndroidTest(libs.hilt.compiler)
 
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7") // 최신 버전 확인 필요
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
+    // datastore
+    implementation(libs.androidx.datastore)
 
-    implementation("androidx.datastore:datastore-preferences:1.1.4")
-    implementation("androidx.datastore:datastore:1.1.4")
+    // compose
+    implementation(platform(libs.compose.bom))
+    implementation(libs.bundles.compose)
+    debugImplementation(libs.compose.ui.tooling)
+    debugImplementation(libs.compose.ui.tooling.preview)
 
-    val room_version = "2.6.1"
-    implementation("androidx.room:room-runtime:$room_version")
-    ksp("androidx.room:room-compiler:$room_version")
-    implementation("androidx.room:room-ktx:$room_version")
+    // room
+    implementation(libs.androidx.room)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 
-    implementation ("com.google.dagger:hilt-android:2.51.1")
-    //kapt ("com.google.dagger:hilt-compiler:2.51.1")
-    ksp ("com.google.dagger:hilt-compiler:2.51.1")
+    // hilt
+    implementation(libs.hilt.andriod)
+    ksp(libs.hilt.compiler)
+    implementation(libs.hilt.navigation.compose)
 
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    // glance
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material3)
 
-
-    // For AppWidgets support
-    implementation("androidx.glance:glance-appwidget:1.1.0")
-
-    // For interop APIs with Material 3
-    implementation("androidx.glance:glance-material3:1.1.0")
-
-    implementation("com.kizitonwose.calendar:compose:2.6.2")
+    // calendar
+    implementation(libs.kizitonwose.calendar.compose)
 
     // firebase
-    implementation(platform("com.google.firebase:firebase-bom:33.15.0"))
-    implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-crashlytics")
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.bundles.firebase)
 }
